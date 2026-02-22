@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CTConsulting — AI & Sustainability</title>
+<title>CTConsulting — AI Sustainability Agent</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
@@ -15,9 +15,6 @@
     --text: #2b2e28;
     --text-muted: #6b7068;
     --accent: #1e2019;
-    --green-light: #b8dbb0;
-    --blue-light: #a8c8e8;
-    --lavender: #c8b8e8;
     --font: 'IBM Plex Sans', sans-serif;
   }
 
@@ -26,19 +23,39 @@
     font-family: var(--font);
     background: var(--bg);
     color: var(--text);
-    overflow-x: hidden;
+    overflow: hidden;
+  }
+
+  /* ─── LAYOUT ─── */
+  .page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Gradient blobs */
+  .page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 55% at 15% 75%, rgba(184,219,176,0.42) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 50% at 82% 22%, rgba(168,200,232,0.35) 0%, transparent 60%),
+      linear-gradient(160deg, #f2f4ef 0%, #e8ece4 100%);
+    pointer-events: none;
+    z-index: 0;
   }
 
   /* ─── HEADER ─── */
   header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
+    position: relative;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 20px 40px;
-    background: transparent;
+    flex-shrink: 0;
   }
 
   .logo {
@@ -51,102 +68,171 @@
     text-transform: uppercase;
     transition: opacity 0.2s;
   }
-  .logo:hover { opacity: 0.65; }
+  .logo:hover { opacity: 0.6; }
 
+  .header-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.6);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(43,46,40,0.08);
+    backdrop-filter: blur(8px);
+  }
 
-  /* ─── CHAT SECTION ─── */
-  .chat-section {
-    min-height: 100vh;
+  .dot-live {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #82c98a, #4aab6d);
+    box-shadow: 0 0 0 2px rgba(130,201,138,0.3);
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(130,201,138,0.3); }
+    50%       { box-shadow: 0 0 0 5px rgba(130,201,138,0.1); }
+  }
+
+  /* ─── CHAT CONTAINER ─── */
+  .chat-container {
+    position: relative;
+    z-index: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 80px 40px;
-    position: relative;
     overflow: hidden;
-    background: linear-gradient(160deg, #f2f4ef 0%, #e8ece4 100%);
+    padding: 0 20px;
   }
 
-  .chat-section::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 55% 55% at 20% 70%, rgba(184, 219, 176, 0.4) 0%, transparent 65%),
-      radial-gradient(ellipse 45% 50% at 80% 25%, rgba(168, 200, 232, 0.35) 0%, transparent 60%);
-    pointer-events: none;
+  /* ─── MESSAGES AREA ─── */
+  .messages-wrap {
+    width: 100%;
+    max-width: 780px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 0 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(43,46,40,0.12) transparent;
   }
+  .messages-wrap::-webkit-scrollbar { width: 4px; }
+  .messages-wrap::-webkit-scrollbar-track { background: transparent; }
+  .messages-wrap::-webkit-scrollbar-thumb { background: rgba(43,46,40,0.12); border-radius: 4px; }
 
-  .chat-label {
+  /* ─── AGENT LABEL ─── */
+  .agent-label {
+    text-align: center;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 18px;
-    position: relative;
+    margin-bottom: 28px;
+    animation: fadeUp 0.5s ease both;
   }
 
-  .chat-headline {
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    font-weight: 300;
-    letter-spacing: -0.02em;
-    text-align: center;
-    max-width: 600px;
-    line-height: 1.25;
-    margin-bottom: 10px;
-    position: relative;
-    animation: fadeUp 0.8s ease both;
+  /* ─── MESSAGE BUBBLES ─── */
+  .msg-row {
+    display: flex;
+    margin-bottom: 14px;
+    animation: fadeUp 0.35s ease both;
   }
+  .msg-row.user { justify-content: flex-end; }
+  .msg-row.bot  { justify-content: flex-start; }
 
-  .chat-sub {
+  .bubble {
+    max-width: 72%;
+    padding: 14px 18px;
+    border-radius: 18px;
     font-size: 14px;
-    color: var(--text-muted);
-    margin-bottom: 44px;
-    text-align: center;
-    position: relative;
-    animation: fadeUp 0.8s ease 0.1s both;
+    line-height: 1.65;
+    font-weight: 400;
+  }
+  .bubble.bot {
+    background: rgba(255,255,255,0.82);
+    border: 1px solid rgba(43,46,40,0.08);
+    border-bottom-left-radius: 5px;
+    color: var(--text);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  }
+  .bubble.user {
+    background: var(--accent);
+    color: #fff;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.12);
   }
 
-  /* ─── PROMPT CHIPS ─── */
-  .prompt-chips {
+  /* Typing indicator */
+  .bubble.typing {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 14px 20px;
+  }
+  .typing-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: typingBounce 1.2s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30%            { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* ─── QUICK REPLY CHIPS ─── */
+  .chips-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    max-width: 800px;
-    width: 100%;
-    margin-bottom: 28px;
-    position: relative;
-    animation: fadeUp 0.8s ease 0.18s both;
+    gap: 9px;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    animation: fadeUp 0.4s ease 0.25s both;
+    padding-left: 2px;
   }
 
   .chip {
-    background: rgba(255,255,255,0.75);
-    border: 1px solid rgba(43,46,40,0.1);
-    border-radius: 12px;
-    padding: 12px 18px;
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(43,46,40,0.13);
+    border-radius: 50px;
+    padding: 9px 16px;
     font-size: 13px;
     font-family: var(--font);
     font-weight: 400;
     color: var(--text);
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
-  .chip:hover {
-    background: rgba(255,255,255,0.95);
-    border-color: rgba(43,46,40,0.22);
+  .chip:hover:not(:disabled) {
+    background: rgba(255,255,255,0.97);
+    border-color: rgba(43,46,40,0.25);
     transform: translateY(-1px);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  }
+  .chip:disabled {
+    opacity: 0.38;
+    cursor: default;
+    pointer-events: none;
   }
 
-  /* ─── CHAT BOX ─── */
-  .chat-box-wrap {
+  /* ─── INPUT AREA ─── */
+  .input-area {
     width: 100%;
-    max-width: 820px;
+    max-width: 780px;
+    padding: 10px 0 22px;
+    flex-shrink: 0;
     position: relative;
-    animation: fadeUp 0.8s ease 0.24s both;
+    z-index: 2;
   }
 
   .chat-box {
@@ -170,12 +256,13 @@
     outline: none;
     background: transparent;
     font-family: var(--font);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 400;
     color: var(--text);
-    padding: 28px 28px 12px;
+    padding: 20px 24px 10px;
     resize: none;
-    min-height: 140px;
+    min-height: 80px;
+    max-height: 180px;
     line-height: 1.6;
   }
   .chat-textarea::placeholder { color: #9da49a; }
@@ -184,7 +271,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 20px 18px;
+    padding: 10px 16px 14px;
     border-top: 1px solid rgba(43,46,40,0.06);
   }
 
@@ -195,41 +282,7 @@
     font-size: 12px;
     font-weight: 500;
     color: var(--text-muted);
-    background: rgba(43,46,40,0.05);
-    padding: 6px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background 0.15s;
   }
-  .chat-model-badge:hover { background: rgba(43,46,40,0.09); }
-
-  .chat-model-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #82c98a, #4aab6d);
-  }
-
-  .chat-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .chat-icon-btn {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    border: 1px solid rgba(43,46,40,0.1);
-    background: transparent;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    color: var(--text-muted);
-    transition: background 0.15s, color 0.15s;
-  }
-  .chat-icon-btn:hover {
-    background: rgba(43,46,40,0.06);
-    color: var(--text);
-  }
-  .chat-icon-btn svg { width: 16px; height: 16px; }
 
   .chat-send-btn {
     width: 36px; height: 36px;
@@ -239,116 +292,262 @@
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     color: #fff;
-    transition: transform 0.15s, background 0.15s;
+    transition: transform 0.15s, background 0.15s, opacity 0.15s;
   }
-  .chat-send-btn:hover {
-    transform: scale(1.08);
-    background: #3a3f35;
-  }
+  .chat-send-btn:hover:not(:disabled) { transform: scale(1.08); background: #3a3f35; }
+  .chat-send-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
   .chat-send-btn svg { width: 15px; height: 15px; }
 
   .chat-hint {
     font-size: 11px;
     color: var(--text-muted);
-    margin-top: 14px;
+    margin-top: 10px;
     text-align: center;
-    position: relative;
+  }
+  kbd {
+    font-family: var(--font);
+    background: rgba(0,0,0,0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 10px;
   }
 
-  /* ─── ANIMATIONS ─── */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
+    from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 700px) {
-    header { padding: 16px 24px; }
-    .hero { padding: 90px 24px 60px; }
-    .hero-sub-row { flex-direction: column; gap: 32px; }
-    .hero-right { font-size: 13px; }
-    .chat-section { padding: 60px 20px; }
-    .chat-box-wrap { max-width: 100%; }
-    .chat-textarea { font-size: 15px; min-height: 120px; }
+  @media (max-width: 600px) {
+    header { padding: 16px 20px; }
+    .header-badge span { display: none; }
+    .chat-container { padding: 0 12px; }
+    .bubble { max-width: 86%; font-size: 13px; }
+    .chip { font-size: 12px; padding: 8px 14px; }
   }
 </style>
 </head>
 <body>
+<div class="page">
 
-<!-- ─── HEADER ─── -->
-<header>
-  <a href="https://ctconsulting.framer.website/" class="logo" target="_blank" rel="noopener">CTCONSULTING</a>
-</header>
+  <!-- HEADER -->
+  <header>
+    <a href="https://ctconsulting.framer.website/" class="logo" target="_blank" rel="noopener">CTCONSULTING</a>
+    <div class="header-badge">
+      <div class="dot-live"></div>
+      AI Sustainability Agent · Beta
+    </div>
+  </header>
 
-<!-- ─── CHAT SECTION ─── -->
-<section class="chat-section" id="chat">
-  <div class="chat-label">AI Sustainability Agent</div>
-  <h2 class="chat-headline">How can I help you today?</h2>
-  <p class="chat-sub">Ask anything about sustainability, carbon emissions, ESG, or environmental strategy.</p>
+  <!-- CHAT -->
+  <div class="chat-container">
+    <div class="messages-wrap" id="messagesWrap">
+      <div class="agent-label">AI Sustainability Agent</div>
+      <div id="messagesList"></div>
+    </div>
 
-  <div class="prompt-chips">
-    <button class="chip" onclick="setPrompt(this)">Reduce our CO₂ footprint</button>
-    <button class="chip" onclick="setPrompt(this)">ESG reporting strategies</button>
-    <button class="chip" onclick="setPrompt(this)">Sustainable supply chain</button>
-    <button class="chip" onclick="setPrompt(this)">Carbon offsetting options</button>
-  </div>
-
-  <div class="chat-box-wrap">
-    <div class="chat-box">
-      <textarea
-        class="chat-textarea"
-        id="chatInput"
-        placeholder="Ask me anything about sustainability, carbon emissions, ESG reporting…"
-        rows="5"
-      ></textarea>
-      <div class="chat-footer">
-        <div class="chat-model-badge">
-          <div class="chat-model-dot"></div>
-          CT Agent · Beta
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5l3 3 3-3"/></svg>
-        </div>
-        <div class="chat-actions">
-          <button class="chat-icon-btn" title="Attach file">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-            </svg>
-          </button>
-          <button class="chat-send-btn" title="Send message" onclick="sendMessage()">
+    <div class="input-area">
+      <div class="chat-box">
+        <textarea
+          class="chat-textarea"
+          id="chatInput"
+          placeholder="Type your question…"
+          rows="3"
+        ></textarea>
+        <div class="chat-footer">
+          <div class="chat-model-badge">
+            <div class="dot-live"></div>
+            CT Agent · Powered by Claude
+          </div>
+          <button class="chat-send-btn" id="sendBtn" title="Send" onclick="sendMessage()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </button>
         </div>
       </div>
+      <p class="chat-hint"><kbd>Shift + Enter</kbd> new line &nbsp;·&nbsp; <kbd>Enter</kbd> send</p>
     </div>
-    <p class="chat-hint">Use <kbd style="font-family:var(--font);background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:4px;font-size:10px;">Shift + Enter</kbd> for a new line · <kbd style="font-family:var(--font);background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:4px;font-size:10px;">Enter</kbd> to send</p>
   </div>
-</section>
 
+</div>
 <script>
-  function setPrompt(btn) {
-    const ta = document.getElementById('chatInput');
-    ta.value = btn.textContent;
-    ta.focus();
+  const SYSTEM_PROMPT = `You are CT Agent, an expert AI sustainability consultant for CTConsulting — a firm that merges AI technology with deep environmental expertise. You help businesses understand and reduce their environmental impact, navigate ESG reporting, cut CO₂ emissions, build sustainable supply chains, and develop long-term sustainability strategies.
+
+Be warm, knowledgeable, and concise. Use plain language. When relevant, mention that CTConsulting offers hands-on consulting services. Keep answers focused and practical. Use short paragraphs. Avoid bullet-heavy responses unless the user specifically needs a list. Always end with a brief follow-up question to keep the conversation going.`;
+
+  const OPENING_MESSAGE = `Hello! I'm CT Agent, your AI sustainability consultant. 👋
+
+I'm here to help your organisation reduce its environmental impact, navigate ESG requirements, and build a genuine sustainability strategy.
+
+What would you like to explore today?`;
+
+  const QUICK_QUESTIONS = [
+    "How can we reduce our CO₂ footprint?",
+    "Where do we start with ESG reporting?",
+    "How do we build a sustainable supply chain?",
+    "What are our best carbon offsetting options?"
+  ];
+
+  let history = [];    // full conversation for the API
+  let chipsLocked = false;
+
+  // ── Helpers ──────────────────────────────────────
+
+  function escapeHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  function sendMessage() {
+  function formatText(text) {
+    return escapeHtml(text)
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function scrollBottom() {
+    const w = document.getElementById('messagesWrap');
+    requestAnimationFrame(() => { w.scrollTop = w.scrollHeight; });
+  }
+
+  // ── Add messages ─────────────────────────────────
+
+  function addBotBubble(text, withChips = false) {
+    const list = document.getElementById('messagesList');
+
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble bot';
+    bubble.innerHTML = formatText(text);
+    row.appendChild(bubble);
+    list.appendChild(row);
+
+    if (withChips) {
+      const chips = document.createElement('div');
+      chips.className = 'chips-row';
+      chips.id = 'quickChips';
+      QUICK_QUESTIONS.forEach(q => {
+        const btn = document.createElement('button');
+        btn.className = 'chip';
+        btn.textContent = q;
+        btn.onclick = () => sendChip(q);
+        chips.appendChild(btn);
+      });
+      list.appendChild(chips);
+    }
+
+    scrollBottom();
+  }
+
+  function addUserBubble(text) {
+    const list = document.getElementById('messagesList');
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble user';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+    list.appendChild(row);
+    scrollBottom();
+  }
+
+  function showTyping() {
+    const list = document.getElementById('messagesList');
+    const row = document.createElement('div');
+    row.className = 'msg-row bot'; row.id = 'typingRow';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble bot typing';
+    bubble.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    row.appendChild(bubble);
+    list.appendChild(row);
+    scrollBottom();
+  }
+
+  function hideTyping() {
+    const el = document.getElementById('typingRow');
+    if (el) el.remove();
+  }
+
+  function lockChips() {
+    if (chipsLocked) return;
+    chipsLocked = true;
+    document.querySelectorAll('#quickChips .chip').forEach(c => c.disabled = true);
+  }
+
+  // ── API call ─────────────────────────────────────
+
+  async function getReply(userText) {
+    history.push({ role: 'user', content: userText });
+
+    document.getElementById('sendBtn').disabled = true;
+    showTyping();
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: history
+        })
+      });
+
+      const data = await res.json();
+      const reply = data.content?.map(b => b.text || '').join('') ||
+                    'Something went wrong. Please try again.';
+
+      history.push({ role: 'assistant', content: reply });
+      hideTyping();
+      addBotBubble(reply);
+    } catch {
+      hideTyping();
+      addBotBubble('Sorry, I couldn\'t connect. Please try again in a moment.');
+    } finally {
+      document.getElementById('sendBtn').disabled = false;
+    }
+  }
+
+  // ── User actions ─────────────────────────────────
+
+  async function sendChip(text) {
+    lockChips();
+    addUserBubble(text);
+    await getReply(text);
+  }
+
+  async function sendMessage() {
     const ta = document.getElementById('chatInput');
     const msg = ta.value.trim();
     if (!msg) return;
-    // Placeholder action — integrate your AI backend here
-    alert('Message sent: ' + msg);
     ta.value = '';
+    autoResize(ta);
+    lockChips();
+    addUserBubble(msg);
+    await getReply(msg);
   }
 
-  document.getElementById('chatInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 180) + 'px';
+  }
+
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
+  document.getElementById('chatInput').addEventListener('input', function () { autoResize(this); });
 
+  // ── Auto-start: bot opens the conversation ────────
 
+  window.addEventListener('DOMContentLoaded', () => {
+    // Seed history so Claude knows the opening context
+    history.push({ role: 'assistant', content: OPENING_MESSAGE });
+
+    // Small delay for a natural feel
+    setTimeout(() => {
+      addBotBubble(OPENING_MESSAGE, true /* show chips */);
+    }, 650);
+  });
 </script>
 </body>
 </html>
